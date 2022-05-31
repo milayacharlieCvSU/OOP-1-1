@@ -131,7 +131,7 @@ class App(Tk):
                 x = symbols('x')
                 func = sympify(self.f)
                 def_F = Integral(func, (x, self.a, self.b))
-                return def_F.as_sum(self.n, 'left').doit().evalf(15)
+                return def_F.as_sum(self.n, 'left').evalf(15)
 
         class UpperSum(ApproxIntegral):
             def approx(self):
