@@ -7,7 +7,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 matplotlib.use('TkAgg')
 from matplotlib.backends.backend_tkagg import (
-    FigureCanvasTkAgg
+    FigureCanvasTkAgg,
+    # NavigationToolbar2Tk
 )
 
 
@@ -92,28 +93,28 @@ class App(Tk):
 
         # -----< Plot >----------------------------------------------------------------------------------------------- #
         # ---------< Figure Environment >----------------------------------------------------------------------------- #
-        figure = plt.Figure(figsize=(5, 5), dpi=100)
+        self.figure = plt.Figure(figsize=(5, 5), dpi=100)
 
         # ---------< Placeholder Data Set >--------------------------------------------------------------------------- #
         x_plot = [-5, 5]
         y_plot = [-5, 5]
 
         # ---------< Plotting P. Data Set >--------------------------------------------------------------------------- #
-        init_plt = figure.subplots()
-        init_plt.scatter(x_plot, y_plot, color='w')
+        self.calc_plt = self.figure.subplots()
+        self.calc_plt.scatter(x_plot, y_plot, color='w')
 
         # ---------< Adjusting Axes >--------------------------------------------------------------------------------- #
-        init_plt.spines['bottom'].set_position(('data', 0))
-        init_plt.spines['left'].set_position(('data', 0))
-        init_plt.axhline(y=init_plt.get_ylim()[0], color='k')
-        init_plt.axvline(x=init_plt.get_xlim()[0], color='k')
-        figure.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01)
-        init_plt.grid()
+        self.calc_plt.spines['bottom'].set_position(('data', 0))
+        self.calc_plt.spines['left'].set_position(('data', 0))
+        self.calc_plt.axhline(y=self.calc_plt.get_ylim()[0], color='k')
+        self.calc_plt.axvline(x=self.calc_plt.get_xlim()[0], color='k')
+        self.figure.subplots_adjust(left=0.01, right=0.99, top=0.99, bottom=0.01)
+        self.calc_plt.grid()
 
         # ---------< Placing Figure in Window >----------------------------------------------------------------------- #
-        figure_canvas = FigureCanvasTkAgg(figure, master=self)
-        figure_canvas.draw()
-        figure_canvas.get_tk_widget().grid(column=1, row=1, rowspan=13)
+        self.calc_canvas = FigureCanvasTkAgg(self.figure, master=self)
+        self.calc_canvas.draw()
+        self.calc_canvas.get_tk_widget().grid(column=1, row=1, rowspan=13)
 
     # -< Calculations >----------------------------------------------------------------------------------------------- #
     def calculate(self):
@@ -131,7 +132,7 @@ class App(Tk):
                 x = symbols('x')
                 func = sympify(self.f)
                 def_F = Integral(func, (x, self.a, self.b))
-                return def_F.as_sum(self.n, 'left').evalf(15)
+                return def_F.as_sum(self.n, 'left').doit().evalf(15)
 
         class UpperSum(ApproxIntegral):
             def approx(self):
@@ -218,8 +219,8 @@ class App(Tk):
 
         # -< Calculated Plot >---------------------------------------------------------------------------------------- #
         # -----< Figure Environment >--------------------------------------------------------------------------------- #
-        calc_figure = plt.Figure(figsize=(5, 5), dpi=100)
-        calc_figure.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1)
+        self.calc_figure = plt.Figure(figsize=(5, 5), dpi=100)
+        self.calc_figure.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1)
 
         # -----< Calculating Data Set >------------------------------------------------------------------------------- #
         x_i = linspace(eval(self.lower_data.get()), eval(self.upper_data.get()), 250)
@@ -228,32 +229,37 @@ class App(Tk):
         F = lambdify(x, y, 'numpy')
 
         # -----< Plotting Calculated Data Set >----------------------------------------------------------------------- #
-        calc_plt = calc_figure.subplots()
-        calc_plt.plot(x_i, F(x_i))
+        self.calc_plt = self.calc_figure.subplots()
+        self.calc_plt.plot(x_i, F(x_i))
+
+        # -----< Visualizing Integral >------------------------------------------------------------------------------- #
+        self.calc_plt.fill_between(x_i, 0, F(x_i), color='blue', alpha=0.25)
 
         # -----< Adjusting Axes >------------------------------------------------------------------------------------- #
-        # if calc_plt.get_xlim()[0] < 0 < calc_plt.get_xlim()[1]:
-        #     calc_plt.spines['left'].set_position(('data', calc_plt.get_xlim()[1]))
-        #     calc_plt.axvline(x=calc_plt.get_xlim()[0], color='k')
-        #     plt.tick_params(axis='y', direction='out', pad=-20)
-        # elif calc_plt.get_xlim()[1] < 0:
-        #     calc_plt.spines['left'].set_position(('data', 0))
-        #     calc_plt.axvline(x=calc_plt.get_xlim()[0], color='k')
-        #     plt.tick_params(axis='y', direction='out', pad=0)
-        # if calc_plt.get_ylim()[0] < 0 < calc_plt.get_ylim()[1]:
-        #     calc_plt.spines['bottom'].set_position(('data', calc_plt.get_ylim()[1]))
-        #     calc_plt.axvline(x=calc_plt.get_ylim()[0], color='k')
-        #     plt.tick_params(axis='x', direction='out', pad=-20)
-        # elif calc_plt.get_ylim()[1] < 0:
-        #     calc_plt.spines['bottom'].set_position(('data', 0))
-        #     calc_plt.axhline(y=calc_plt.get_ylim()[0], color='k')
-        #     plt.tick_params(axis='x', direction='out', pad=0)
-        calc_plt.grid()
+        x_min = self.calc_plt.get_xlim()[0]
+        x_max = self.calc_plt.get_xlim()[1]
+        y_min = self.calc_plt.get_ylim()[0]
+        y_max = self.calc_plt.get_ylim()[1]
+        if x_min < 0 < x_max:
+            self.calc_plt.spines['left'].set_position(('data', 0))
+            self.calc_plt.axvline(x=x_min, color='k')
+        elif x_max <= 0:
+            self.calc_plt.spines['right'].set_position(('data', x_min))
+            self.calc_plt.spines['left'].set_position(('data', x_max))
+            self.calc_plt.tick_params(axis='y', pad=-25, direction='in')
+        if y_min < 0 < y_max:
+            self.calc_plt.spines['bottom'].set_position(('data', 0))
+            self.calc_plt.axhline(y=y_min, color='k')
+        elif y_max <= 0:
+            self.calc_plt.spines['top'].set_position(('data', y_min))
+            self.calc_plt.spines['bottom'].set_position(('data', y_max))
+            self.calc_plt.tick_params(axis='x', pad=-15, direction='in')
 
         # -----< Placing Figure in Window >--------------------------------------------------------------------------- #
-        calc_canvas = FigureCanvasTkAgg(calc_figure, master=self)
-        calc_canvas.draw()
-        calc_canvas.get_tk_widget().grid(column=1, row=1, rowspan=12)
+        self.calc_plt.grid()
+        self.calc_canvas = FigureCanvasTkAgg(self.calc_figure, master=self)
+        self.calc_canvas.draw()
+        self.calc_canvas.get_tk_widget().grid(column=1, row=1, rowspan=13)
 
 
 if __name__ == "__main__":
