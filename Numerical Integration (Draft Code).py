@@ -127,7 +127,6 @@ class App(Tk):
 
         class LowerSum(ApproxIntegral):
             def approx(self):
-                print('Riemann Lower Sum')
                 x = symbols('x')
                 func = sympify(self.f)
                 def_F = Integral(func, (x, self.a, self.b))
@@ -135,7 +134,6 @@ class App(Tk):
 
         class UpperSum(ApproxIntegral):
             def approx(self):
-                print('Riemann Upper Sum')
                 x = symbols('x')
                 func = sympify(self.f)
                 def_F = Integral(func, (x, self.a, self.b))
@@ -143,7 +141,6 @@ class App(Tk):
 
         class Midpoint(ApproxIntegral):
             def approx(self):
-                print('Midpoint Rule')
                 x = symbols('x')
                 func = sympify(self.f)
                 def_F = Integral(func, (x, self.a, self.b))
@@ -151,7 +148,6 @@ class App(Tk):
 
         class Trapezoid(ApproxIntegral):
             def approx(self):
-                print('Trapezoidal Rule')
                 x = symbols('x')
                 func = sympify(self.f)
                 def_F = Integral(func, (x, self.a, self.b))
@@ -159,7 +155,6 @@ class App(Tk):
 
         class Simpson(ApproxIntegral):
             def approx(self):
-                print("Simpson's Rule")
                 x = symbols('x')
                 func = sympify(self.f)
                 if int(self.n)%2 != 0:
