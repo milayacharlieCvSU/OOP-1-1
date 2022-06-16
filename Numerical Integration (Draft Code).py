@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter.ttk import Combobox
 from sympy import *
+from sympy.abc import x
 from scipy.integrate import simpson
 from numpy import *
 import matplotlib
@@ -127,35 +128,30 @@ class App(Tk):
 
         class LowerSum(ApproxIntegral):
             def approx(self):
-                x = symbols('x')
                 func = sympify(self.f)
                 def_F = Integral(func, (x, self.a, self.b))
-                return def_F.as_sum(self.n, 'left').doit().evalf(15)
+                return def_F.as_sum(self.n, 'left').evalf(15)
 
         class UpperSum(ApproxIntegral):
             def approx(self):
-                x = symbols('x')
                 func = sympify(self.f)
                 def_F = Integral(func, (x, self.a, self.b))
                 return def_F.as_sum(self.n, 'right').evalf(15)
 
         class Midpoint(ApproxIntegral):
             def approx(self):
-                x = symbols('x')
                 func = sympify(self.f)
                 def_F = Integral(func, (x, self.a, self.b))
                 return def_F.as_sum(self.n, 'midpoint').evalf(15)
 
         class Trapezoid(ApproxIntegral):
             def approx(self):
-                x = symbols('x')
                 func = sympify(self.f)
                 def_F = Integral(func, (x, self.a, self.b))
                 return def_F.as_sum(self.n, 'trapezoid').evalf(15)
 
         class Simpson(ApproxIntegral):
             def approx(self):
-                x = symbols('x')
                 func = sympify(self.f)
                 if int(self.n)%2 != 0:
                     self.n = int(self.n) + 1
@@ -167,7 +163,6 @@ class App(Tk):
 
         class ExactIntegral(ApproxIntegral):
             def exact_value(self):
-                x = symbols('x')
                 func = sympify(self.f)
                 def_F = integrate(func, (x, self.a, self.b))
                 return def_F.evalf(15)
@@ -216,18 +211,19 @@ class App(Tk):
         self.calc_figure = plt.Figure(figsize=(5, 5), dpi=100)
         self.calc_figure.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1)
 
-        # -----< Calculating Data Set >------------------------------------------------------------------------------- #
-        x_i = linspace(eval(self.lower_data.get()), eval(self.upper_data.get()), 250)
-        x = Symbol('x')
-        y = sympify(self.funct_data.get())
-        F = lambdify(x, y, 'numpy')
-
-        # -----< Plotting Calculated Data Set >----------------------------------------------------------------------- #
+        # -----< Calculating and Plotting Data Set and Visualizing Integral >----------------------------------------- #
         self.calc_plt = self.calc_figure.subplots()
-        self.calc_plt.plot(x_i, F(x_i))
-
-        # -----< Visualizing Integral >------------------------------------------------------------------------------- #
-        self.calc_plt.fill_between(x_i, 0, F(x_i), color='blue', alpha=0.25)
+        x_i = linspace(eval(self.lower_data.get()), eval(self.upper_data.get()), 250)
+        if type(eval(self.funct_data.get())) == float or type(eval(self.funct_data.get())) == int:
+            y = eval(self.funct_data.get())
+            F = [y for i in x_i]
+            self.calc_plt.plot(x_i, F)
+            self.calc_plt.fill_between(x_i, 0, F, color='blue', alpha=0.25)
+        else:
+            y = sympify(self.funct_data.get())
+            F = lambdify(x, y, 'numpy')
+            self.calc_plt.plot(x_i, F(x_i))
+            self.calc_plt.fill_between(x_i, 0, F(x_i), color='blue', alpha=0.25)
 
         # -----< Adjusting Axes >------------------------------------------------------------------------------------- #
         x_min = self.calc_plt.get_xlim()[0]
