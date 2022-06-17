@@ -214,15 +214,15 @@ class App(Tk):
         # -----< Calculating and Plotting Data Set and Visualizing Integral >----------------------------------------- #
         self.calc_plt = self.calc_figure.subplots()
         x_i = linspace(eval(self.lower_data.get()), eval(self.upper_data.get()), 250)
-        if type(eval(self.funct_data.get())) == float or type(eval(self.funct_data.get())) == int:
+        try:
             y = eval(self.funct_data.get())
             F = [y for i in x_i]
-            self.calc_plt.plot(x_i, F)
+            self.calc_plt.plot(x_i, F, 'b')
             self.calc_plt.fill_between(x_i, 0, F, color='blue', alpha=0.25)
-        else:
+        except:
             y = sympify(self.funct_data.get())
             F = lambdify(x, y, 'numpy')
-            self.calc_plt.plot(x_i, F(x_i))
+            self.calc_plt.plot(x_i, F(x_i), 'b')
             self.calc_plt.fill_between(x_i, 0, F(x_i), color='blue', alpha=0.25)
 
         # -----< Adjusting Axes >------------------------------------------------------------------------------------- #
